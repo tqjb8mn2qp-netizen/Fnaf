@@ -1323,8 +1323,8 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (spawn in open area of map)
-    player.position.set(3, 0.5, 3);  // Open area with room to move
+    // Reset player (spawn at your exact position)
+    player.position.set(0.1, 0.5, 1.0);  // Your chosen spawn location
     if (player.mesh) {
         player.mesh.position.copy(player.position);
         player.mesh.rotation.y = 0;  // Face forward
