@@ -1323,16 +1323,16 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (start in center of security room, away from walls)
-    player.position.set(0, 0.5, -3);  // Spawn in center, away from lockers
+    // Reset player (start INSIDE security room, facing the monitors/desk)
+    player.position.set(-2, 0.5, -5);  // Inside the security room
     if (player.mesh) {
         player.mesh.position.copy(player.position);
-        player.mesh.rotation.y = 0;  // Face forward into room
+        player.mesh.rotation.y = Math.PI / 2;  // Face toward monitors
         player.mesh.visible = false; // Hide in first-person
     }
     
-    // Reset camera rotation (facing forward into security room)
-    cameraRotation.yaw = 0;
+    // Reset camera rotation (facing toward monitors/control panel)
+    cameraRotation.yaw = Math.PI / 2;  // Face monitors
     cameraRotation.pitch = 0;
     
     flashlight.battery = 100;
