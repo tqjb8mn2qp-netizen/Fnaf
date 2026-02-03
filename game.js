@@ -1580,6 +1580,12 @@ function updatePlayer(delta) {
 
     // Check for nearby interactables
     checkNearbyInteractables();
+    
+    // Update position debug display
+    const posDebug = document.getElementById('positionDebug');
+    if (posDebug) {
+        posDebug.textContent = `Position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}, ${player.position.z.toFixed(1)})`;
+    }
 }
 
 function updateCamera() {
