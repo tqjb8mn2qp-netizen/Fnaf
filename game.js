@@ -1323,8 +1323,8 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (spawn at your exact position)
-    player.position.set(0.1, 0.5, 1.0);  // Your chosen spawn location
+    // Reset player (spawn at your exact position - moved up to avoid floor clip)
+    player.position.set(0.1, 1.0, 1.0);  // Raised Y to 1.0 to avoid being stuck in floor
     if (player.mesh) {
         player.mesh.position.copy(player.position);
         player.mesh.rotation.y = 0;  // Face forward
