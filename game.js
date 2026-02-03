@@ -1323,16 +1323,16 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (start at security desk, facing monitors - classic FNAF office view)
-    player.position.set(0, 1.0, -6);  // At the desk, eye level with monitors
+    // Reset player (start at security office desk - trying alternative coordinates)
+    player.position.set(5, 1.2, 2);  // Try different position for security desk
     if (player.mesh) {
         player.mesh.position.copy(player.position);
-        player.mesh.rotation.y = 0;  // Face forward toward monitors
+        player.mesh.rotation.y = -Math.PI / 2;  // Face left toward monitors
         player.mesh.visible = false; // Hide in first-person
     }
     
-    // Reset camera rotation (facing forward at monitors)
-    cameraRotation.yaw = 0;  // Face straight at the monitors
+    // Reset camera rotation (facing toward security desk/monitors)
+    cameraRotation.yaw = -Math.PI / 2;  // Face left
     cameraRotation.pitch = 0;
     
     flashlight.battery = 100;
