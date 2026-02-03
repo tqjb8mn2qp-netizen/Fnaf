@@ -65,7 +65,9 @@ function simulateLoading() {
     let progress = 0;
     
     const interval = setInterval(() => {
-        progress += Math.random() * 12 + 3; // Random progress between 3-15%
+        // Slower progress: Random between 2-6% (was 3-15%)
+        progress += Math.random() * 4 + 2;
+        
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
@@ -74,7 +76,7 @@ function simulateLoading() {
             if (loadingBar) loadingBar.style.width = progress + '%';
             if (loadingProgress) loadingProgress.textContent = Math.floor(progress) + '%';
             
-            // Loading complete - show warning screen
+            // Loading complete - show warning screen after a pause
             setTimeout(() => {
                 loadingScreen.classList.add('hidden');
                 setTimeout(() => {
@@ -83,13 +85,13 @@ function simulateLoading() {
                     warningScreen.classList.add('active');
                     loadingComplete = true;
                 }, 500);
-            }, 800);
+            }, 1000); // Increased pause at 100%
         } else {
             // Update progress display
             if (loadingBar) loadingBar.style.width = progress + '%';
             if (loadingProgress) loadingProgress.textContent = Math.floor(progress) + '%';
         }
-    }, 150);
+    }, 250); // Slower interval: 250ms (was 150ms)
 }
 
 // Game State
