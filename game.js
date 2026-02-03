@@ -1337,6 +1337,7 @@ function startGame() {
     
     flashlight.battery = 100;
     player.hiding = false;
+    player.canMove = true;  // Make sure player can move!
     
     console.log('Game started! Player position:', player.position);
     
