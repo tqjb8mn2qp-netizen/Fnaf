@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 warningScreen.remove(); // Remove from DOM completely
                 mainMenu.style.display = 'flex';
                 
+                // Make game canvas and HUD visible
+                document.body.classList.add('game-ready');
+                
                 // Try to play menu music after warning dismissed
                 const menuMusic = document.getElementById('menuMusic');
                 if (menuMusic) {

@@ -20,8 +20,18 @@
             background: #000;
         }
 
-        #gameCanvas {
+        /* Hide game canvas and HUD until warning is dismissed */
+        #gameCanvas,
+        #hud {
+            display: none;
+        }
+
+        body.game-ready #gameCanvas,
+        body.game-ready #hud {
             display: block;
+        }
+
+        #gameCanvas {
             width: 100vw;
             height: 100vh;
         }
