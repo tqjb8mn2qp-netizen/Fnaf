@@ -192,10 +192,10 @@ function init() {
         document.getElementById('desktopInstructions').style.display = 'none';
     }
 
-    // Scene with daylight
+    // Scene with nighttime atmosphere
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky blue color
-    // No fog - clear daylight visibility
+    scene.background = new THREE.Color(0x000000); // Black night sky
+    scene.fog = new THREE.Fog(0x000011, 5, 40); // Dense night fog
 
     // Camera (First-person)
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -212,34 +212,33 @@ function init() {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Limit pixel ratio for performance
-    renderer.shadowMap.enabled = false; // Disable shadows for daylight
-    renderer.shadowMap.type = THREE.BasicShadowMap;
+    renderer.shadowMap.enabled = true; // Enable shadows for nighttime
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Daylight lighting - bright outdoor lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Bright white ambient light
+    // Nighttime lighting - very dim ambient light
+    const ambientLight = new THREE.AmbientLight(0x0a0a1a, 0.15); // Very dark blue ambient
     scene.add(ambientLight);
 
-    // Directional sunlight
-    const sunLight = new THREE.DirectionalLight(0xffffee, 1.0);
-    sunLight.position.set(50, 100, 50); // Sun position (high in the sky)
-    sunLight.castShadow = false;
-    scene.add(sunLight);
+    // Moonlight (very subtle)
+    const moonLight = new THREE.DirectionalLight(0x4444aa, 0.2);
+    moonLight.position.set(50, 100, 50);
+    moonLight.castShadow = true;
+    moonLight.shadow.mapSize.width = 2048;
+    moonLight.shadow.mapSize.height = 2048;
+    scene.add(moonLight);
 
-    // Flashlight (disabled in daylight but kept for functionality)
-    flashlight.light = new THREE.SpotLight(0xffffaa, 0, flashlight.distance, flashlight.angle, 0.5, 2);
+    // Flashlight (essential for nighttime navigation)
+    flashlight.light = new THREE.SpotLight(0xffffaa, flashlight.intensity, flashlight.distance, flashlight.angle, 0.5, 2);
     flashlight.light.position.copy(camera.position);
     flashlight.light.target.position.set(0, 0, -1);
     flashlight.light.castShadow = true;
     scene.add(flashlight.light);
     scene.add(flashlight.light.target);
 
-    // Create simple environment (no FNAF map or animatronics)
-    createSimpleEnvironment();
-    // createDoors(); // Removed - no doors needed
-    // createHidingSpots(); // Removed - no hiding spots needed
-    // Animatronics removed - no enemies in the game
+    // Load the new FNAF Help Wanted map
+    loadNewFNAFMap();
     
-    // Note: Simple exploration environment only
+    // Note: Night time exploration with new map model
 
     // Event listeners
     document.addEventListener('keydown', onKeyDown);
@@ -392,45 +391,60 @@ function init() {
     animate();
 }
 
-// Simple environment without FNAF map
-function createSimpleEnvironment() {
-    console.log('Creating simple daylight environment...');
+// Load new FNAF Help Wanted map
+function loadNewFNAFMap() {
+    const loader = new THREE.GLTFLoader();
     
-    // Create a grass-like floor (green)
-    const floorGeometry = new THREE.PlaneGeometry(100, 100);
-    const floorMaterial = new THREE.MeshStandardMaterial({
-        color: 0x7ec850, // Grass green color
-        roughness: 0.9,
-        metalness: 0.0
-    });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = false; // No shadows in bright daylight
-    scene.add(floor);
+    console.log('Loading FNAF Help Wanted map model...');
     
-    // Create bright white walls
-    const wallHeight = 3;
-    const wallThickness = 0.2;
-    const roomSize = 20;
-    const wallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xeeeeee, // Light gray/white walls
-        roughness: 0.7,
-        metalness: 0.0
-    });
-    
-    // North wall
-    const northWall = createWall(0, wallHeight/2, -roomSize/2, roomSize, wallHeight, wallThickness, wallMaterial);
-    
-    // South wall
-    const southWall = createWall(0, wallHeight/2, roomSize/2, roomSize, wallHeight, wallThickness, wallMaterial);
-    
-    // East wall
-    const eastWall = createWall(roomSize/2, wallHeight/2, 0, wallThickness, wallHeight, roomSize, wallMaterial);
-    
-    // West wall
-    const westWall = createWall(-roomSize/2, wallHeight/2, 0, wallThickness, wallHeight, roomSize, wallMaterial);
-    
-    console.log('Daylight environment created!');
+    loader.load(
+        'fnaf_1_hw_map.glb',
+        function (gltf) {
+            console.log('FNAF HW map loaded successfully!');
+            fnafMapModel = gltf.scene;
+            
+            // Clear collision walls array
+            collisionWalls = [];
+            
+            // Enable shadows and collision for map meshes
+            let meshCount = 0;
+            fnafMapModel.traverse((child) => {
+                if (child.isMesh) {
+                    meshCount++;
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    // Add all meshes to collision detection
+                    collisionWalls.push(child);
+                }
+            });
+            
+            console.log(`Loaded ${meshCount} meshes with collision`);
+            
+            // Add the map to the scene
+            scene.add(fnafMapModel);
+            
+            console.log('FNAF HW map added to scene!');
+        },
+        function (xhr) {
+            const percentComplete = (xhr.loaded / xhr.total) * 100;
+            console.log('Loading model: ' + percentComplete.toFixed(2) + '% loaded');
+        },
+        function (error) {
+            console.error('Error loading FNAF HW map:', error);
+            alert('Failed to load FNAF HW map! Check console for details.');
+            // Fallback: create a simple floor
+            const floorGeometry = new THREE.PlaneGeometry(100, 100);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x111111,
+                roughness: 0.9
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+        }
+    );
 }
 
 // OLD MAP LOADING FUNCTIONS - DISABLED
