@@ -1534,8 +1534,8 @@ function updatePlayer(delta) {
             player.position.z + direction.z * moveSpeed
         );
 
-        // Check for collision before moving
-        if (!checkCollision(newPosition)) {
+        // Check for collision before moving (DISABLED - noclip mode for positioning)
+        if (true) { // Collision disabled - you can walk through walls
             // No collision - safe to move!
             player.position.copy(newPosition);
             
