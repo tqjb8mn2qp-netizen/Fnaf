@@ -147,9 +147,9 @@ let flashlight = {
     on: false,
     battery: 100,
     drainRate: 0.5, // % per second when on (EASIER: 4x slower drain!)
-    intensity: 2,
-    distance: 25, // EASIER: Longer range
-    angle: Math.PI / 5, // EASIER: Wider beam
+    intensity: 4, // Much brighter flashlight
+    distance: 40, // Much longer range
+    angle: Math.PI / 4, // Much wider beam
     light: null
 };
 
@@ -195,7 +195,7 @@ function init() {
     // Scene with nighttime atmosphere
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000); // Black night sky
-    scene.fog = new THREE.Fog(0x000011, 5, 40); // Dense night fog
+    scene.fog = new THREE.Fog(0x000011, 10, 60); // Less dense fog for better visibility
 
     // Camera (First-person)
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -215,12 +215,12 @@ function init() {
     renderer.shadowMap.enabled = true; // Enable shadows for nighttime
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Nighttime lighting - very dim ambient light
-    const ambientLight = new THREE.AmbientLight(0x0a0a1a, 0.15); // Very dark blue ambient
+    // Nighttime lighting - increased visibility
+    const ambientLight = new THREE.AmbientLight(0x404060, 0.5); // Brighter ambient for visibility
     scene.add(ambientLight);
 
-    // Moonlight (very subtle)
-    const moonLight = new THREE.DirectionalLight(0x4444aa, 0.2);
+    // Moonlight (stronger for better visibility)
+    const moonLight = new THREE.DirectionalLight(0x8888cc, 0.6);
     moonLight.position.set(50, 100, 50);
     moonLight.castShadow = true;
     moonLight.shadow.mapSize.width = 2048;
@@ -1323,15 +1323,15 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (start in security room)
-    player.position.set(-15, 0, -10);  // Spawn in security room
+    // Reset player (start in main hall area - safe open spawn point)
+    player.position.set(0, 0.5, 8);  // Spawn in open area, slightly elevated to avoid floor clipping
     if (player.mesh) {
         player.mesh.position.copy(player.position);
         player.mesh.rotation.y = 0;  // Face forward
         player.mesh.visible = false; // Hide in first-person
     }
     
-    // Reset camera rotation (facing forward in security room)
+    // Reset camera rotation (facing forward)
     cameraRotation.yaw = 0;
     cameraRotation.pitch = 0;
     
