@@ -1323,16 +1323,16 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (start in main hallway/dining area, away from office computer)
-    player.position.set(10, 0, 5);  // Spawn away from office computer
+    // Reset player (start in security room)
+    player.position.set(-15, 0, -10);  // Spawn in security room
     if (player.mesh) {
         player.mesh.position.copy(player.position);
-        player.mesh.rotation.y = Math.PI;  // Face different direction
+        player.mesh.rotation.y = 0;  // Face forward
         player.mesh.visible = false; // Hide in first-person
     }
     
-    // Reset camera rotation (facing back toward office)
-    cameraRotation.yaw = Math.PI;
+    // Reset camera rotation (facing forward in security room)
+    cameraRotation.yaw = 0;
     cameraRotation.pitch = 0;
     
     flashlight.battery = 100;
