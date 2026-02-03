@@ -766,20 +766,39 @@
         }
 
         .warning-content {
-            max-width: 900px;
+            max-width: 1000px;
             max-height: 90vh;
-            text-align: center;
+            text-align: left;
             animation: warningFadeIn 0.8s ease-out;
             position: relative;
             z-index: 1;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 3px solid rgba(255, 0, 0, 0.4);
-            border-radius: 15px;
+            padding: 40px 50px;
+            background: linear-gradient(135deg, rgba(20, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.95) 100%);
+            border: 2px solid rgba(255, 68, 0, 0.5);
+            border-radius: 12px;
             box-shadow: 
-                0 0 60px rgba(255, 0, 0, 0.3),
-                inset 0 0 30px rgba(0, 0, 0, 0.5);
+                0 10px 60px rgba(0, 0, 0, 0.8),
+                0 0 100px rgba(255, 0, 0, 0.2),
+                inset 0 0 40px rgba(0, 0, 0, 0.5);
             overflow-y: auto;
+        }
+
+        .warning-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .warning-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+        }
+
+        .warning-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 68, 0, 0.6);
+            border-radius: 4px;
+        }
+
+        .warning-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 68, 0, 0.8);
         }
 
         @keyframes warningFadeIn {
@@ -793,30 +812,44 @@
             }
         }
 
+        .warning-header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid rgba(255, 68, 0, 0.3);
+        }
+
+        .warning-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            animation: warningIconPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 68, 0, 0.6));
+        }
+
+        @keyframes warningIconPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
         .warning-title {
-            font-size: 52px;
+            font-size: 48px;
             font-family: 'Courier New', monospace;
             font-weight: 900;
-            color: #ff0000;
-            letter-spacing: 12px;
-            margin-bottom: 20px;
+            color: #ff4400;
+            letter-spacing: 8px;
+            margin: 0;
             text-shadow: 
-                0 0 30px #ff0000,
-                0 0 60px #ff0000,
-                0 0 90px rgba(255, 0, 0, 0.5),
-                4px 4px 10px rgba(0, 0, 0, 0.9);
-            animation: warningTitlePulse 2s ease-in-out infinite;
-            position: relative;
+                0 0 20px rgba(255, 68, 0, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
-        .warning-title::before {
-            content: '⚠ ';
-            animation: warningIconBlink 1s ease-in-out infinite;
-        }
-
-        .warning-title::after {
-            content: ' ⚠';
-            animation: warningIconBlink 1s ease-in-out infinite 0.5s;
+        .warning-subtitle {
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            color: #cccccc;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         @keyframes warningTitlePulse {
@@ -835,144 +868,254 @@
             50% { opacity: 0.3; }
         }
 
-        .warning-text {
-            font-size: 18px;
+        .warning-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
             font-family: 'Courier New', monospace;
+            color: #ff6600;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 68, 0, 0.2);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .warning-text {
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+            line-height: 1.8;
+            margin: 0;
+        }
+
+        .warning-text strong {
             color: #ffffff;
-            line-height: 1.7;
-            margin-bottom: 20px;
-            text-shadow: 
-                0 0 10px rgba(255, 0, 0, 0.3),
-                2px 2px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .warning-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 68, 0, 0.05);
+            border: 1px solid rgba(255, 68, 0, 0.2);
+            border-left: 4px solid #ff4400;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .warning-item:hover {
+            background: rgba(255, 68, 0, 0.1);
+            border-left-color: #ff6600;
+            transform: translateX(5px);
+        }
+
+        .warning-item-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+            filter: grayscale(0.3);
+        }
+
+        .warning-item-content strong {
+            display: block;
+            font-size: 14px;
+            color: #ffaa66;
+            margin-bottom: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .warning-item-content p {
+            font-size: 12px;
+            color: #cccccc;
+            line-height: 1.6;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .health-advisory {
+            background: rgba(255, 187, 0, 0.08);
+            border: 2px solid rgba(255, 187, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .health-advisory > p {
+            font-size: 14px;
+            color: #ffbb33;
+            margin: 0 0 12px 0;
+            font-family: 'Courier New', monospace;
             font-weight: bold;
         }
 
-        .warning-subtext {
-            font-size: 15px;
-            font-family: 'Courier New', monospace;
-            color: #cccccc;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+        .health-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
         }
 
-        .warning-list {
-            text-align: left;
-            font-size: 14px;
-            font-family: 'Courier New', monospace;
-            color: #ffaa00;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            background: rgba(255, 68, 0, 0.08);
-            border: 2px solid rgba(255, 68, 0, 0.3);
-            border-left: 6px solid #ff4400;
-            border-radius: 8px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .warning-list-item {
-            margin: 8px 0;
-            padding-left: 20px;
+        .health-list li {
+            font-size: 13px;
+            color: #e0e0e0;
+            line-height: 1.8;
+            padding-left: 25px;
             position: relative;
+            font-family: 'Courier New', monospace;
+            margin: 8px 0;
         }
 
-        .warning-list-item::before {
-            content: '▸';
+        .health-list li::before {
+            content: '✗';
             position: absolute;
             left: 0;
             color: #ff4400;
-            font-size: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .health-note {
+            font-size: 12px;
+            color: #ffbb33;
+            font-style: italic;
+            margin: 15px 0 0 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            line-height: 1.7;
+            font-family: 'Courier New', monospace;
         }
 
         .warning-disclaimer {
-            font-size: 13px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0 25px 0;
+        }
+
+        .warning-disclaimer > p {
+            font-size: 14px;
+            color: #ffffff;
+            margin: 0 0 15px 0;
             font-family: 'Courier New', monospace;
-            color: #ff8800;
-            line-height: 1.5;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(255, 136, 0, 0.12);
-            border: 3px solid rgba(255, 136, 0, 0.4);
-            border-radius: 12px;
-            box-shadow: 
-                0 0 20px rgba(255, 136, 0, 0.2),
-                inset 0 0 15px rgba(0, 0, 0, 0.3);
-            font-style: italic;
+            font-weight: bold;
+        }
+
+        .disclaimer-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+
+        .disclaimer-list li {
+            font-size: 13px;
+            color: #e0e0e0;
+            line-height: 1.8;
+            padding-left: 25px;
+            position: relative;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+
+        .disclaimer-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #ff4400;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .disclaimer-footer {
+            font-size: 13px;
+            color: #ff6600;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0 0 0;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 68, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
         }
 
         .continue-button {
-            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
             font-family: 'Courier New', monospace;
             font-weight: bold;
             color: #ffffff;
-            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-            padding: 15px 40px;
-            border: 3px solid #ff0000;
+            background: linear-gradient(135deg, #ff4400 0%, #cc0000 100%);
+            padding: 20px;
+            border: 2px solid #ff6600;
             border-radius: 8px;
             cursor: pointer;
-            letter-spacing: 4px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 
-                0 0 30px rgba(255, 0, 0, 0.6),
-                0 6px 15px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            animation: continueButtonPulse 2.5s ease-in-out infinite;
+                0 0 40px rgba(255, 68, 0, 0.5),
+                0 6px 20px rgba(0, 0, 0, 0.6),
+                inset 0 2px 0 rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .button-text {
+            font-size: 20px;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .button-subtext {
+            font-size: 11px;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            font-weight: normal;
         }
 
         .continue-button::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-            animation: buttonShine 3s linear infinite;
+            top: 50%;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: buttonShineSlide 3s linear infinite;
         }
 
-        @keyframes buttonShine {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        @keyframes continueButtonPulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 
-                    0 0 30px rgba(255, 0, 0, 0.6),
-                    0 6px 15px rgba(0, 0, 0, 0.5),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            }
-            50% { 
-                transform: scale(1.05);
-                box-shadow: 
-                    0 0 50px rgba(255, 0, 0, 0.9),
-                    0 8px 20px rgba(0, 0, 0, 0.6),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            }
+        @keyframes buttonShineSlide {
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
 
         .continue-button:hover {
-            background: linear-gradient(135deg, #ff3333 0%, #ff0000 100%);
-            transform: scale(1.1) translateY(-2px);
-            border-color: #ff3333;
+            background: linear-gradient(135deg, #ff6600 0%, #ff0000 100%);
+            transform: translateY(-3px);
+            border-color: #ff8800;
             box-shadow: 
-                0 0 60px rgba(255, 0, 0, 1),
-                0 10px 25px rgba(0, 0, 0, 0.7),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                0 0 60px rgba(255, 68, 0, 0.8),
+                0 10px 30px rgba(0, 0, 0, 0.7),
+                inset 0 2px 0 rgba(255, 255, 255, 0.3);
         }
 
         .continue-button:active {
-            transform: scale(1) translateY(0);
+            transform: translateY(-1px);
             box-shadow: 
-                0 0 30px rgba(255, 0, 0, 0.8),
-                0 3px 10px rgba(0, 0, 0, 0.6),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                0 0 40px rgba(255, 68, 0, 0.6),
+                0 4px 15px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         /* Mobile responsive */
@@ -988,53 +1131,95 @@
             }
 
             .warning-content {
-                padding: 20px;
-                max-height: 85vh;
+                padding: 25px 20px;
+                max-height: 88vh;
+            }
+
+            .warning-icon {
+                font-size: 48px;
             }
 
             .warning-title {
-                font-size: 28px;
+                font-size: 32px;
                 letter-spacing: 4px;
-                margin-bottom: 15px;
             }
 
-            .warning-title::before,
-            .warning-title::after {
-                font-size: 24px;
+            .warning-subtitle {
+                font-size: 12px;
+            }
+
+            .section-title {
+                font-size: 16px;
             }
 
             .warning-text {
-                font-size: 14px;
-                margin-bottom: 15px;
+                font-size: 13px;
             }
 
-            .warning-subtext {
+            .warning-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .warning-item {
+                padding: 12px;
+            }
+
+            .warning-item-icon {
+                font-size: 24px;
+            }
+
+            .warning-item-content strong {
                 font-size: 12px;
-                margin-bottom: 15px;
             }
 
-            .warning-list {
+            .warning-item-content p {
                 font-size: 11px;
-                padding: 12px 15px;
-                margin-bottom: 15px;
             }
 
-            .warning-list-item {
-                margin: 6px 0;
-                padding-left: 15px;
+            .health-advisory {
+                padding: 15px;
+            }
+
+            .health-advisory > p {
+                font-size: 12px;
+            }
+
+            .health-list li {
+                font-size: 11px;
+            }
+
+            .health-note {
+                font-size: 11px;
             }
 
             .warning-disclaimer {
+                padding: 15px;
+            }
+
+            .warning-disclaimer > p {
+                font-size: 12px;
+            }
+
+            .disclaimer-list li {
                 font-size: 11px;
-                padding: 12px;
-                margin-bottom: 15px;
+            }
+
+            .disclaimer-footer {
+                font-size: 11px;
+            }
+
+            .button-text {
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
+
+            .button-subtext {
+                font-size: 10px;
             }
 
             .continue-button {
-                font-size: 14px;
-                padding: 12px 30px;
-                letter-spacing: 2px;
-                margin-bottom: 10px;
+                padding: 16px;
             }
         }
     </style>
@@ -1056,26 +1241,91 @@
     <!-- Warning Screen (shows after loading) -->
     <div id="warningScreen">
         <div class="warning-content">
-            <h1 class="warning-title">WARNING</h1>
-            <p class="warning-text">
-                This game contains intense horror elements<br>
-                including jump scares, disturbing imagery, and psychological tension.
-            </p>
-            <p class="warning-subtext">
-                Experience may cause anxiety, increased heart rate, and stress.<br>
-                Not recommended for young children or those with heart conditions.
-            </p>
-            <div class="warning-list">
-                <div class="warning-list-item">Photosensitive seizure warning: Flashing lights and patterns</div>
-                <div class="warning-list-item">Sudden loud sounds and intense audio effects</div>
-                <div class="warning-list-item">Dark atmospheric environments with limited visibility</div>
-                <div class="warning-list-item">Suspenseful gameplay designed to create fear and tension</div>
+            <div class="warning-header">
+                <div class="warning-icon">⚠</div>
+                <h1 class="warning-title">CONTENT WARNING</h1>
+                <div class="warning-subtitle">Please Read Before Playing</div>
             </div>
-            <p class="warning-disclaimer">
-                By continuing, you acknowledge that you understand the nature of this horror game<br>
-                and accept responsibility for your experience. Player discretion is strongly advised.
-            </p>
-            <button class="continue-button" id="warningContinueBtn">I UNDERSTAND - CONTINUE</button>
+            
+            <div class="warning-section">
+                <h2 class="section-title">Horror Experience Advisory</h2>
+                <p class="warning-text">
+                    <strong>Shadows of Freddy's</strong> is a psychological horror game featuring intense and potentially disturbing content. 
+                    This experience is designed to create suspense, fear, and anxiety through various audiovisual techniques.
+                </p>
+            </div>
+
+            <div class="warning-section">
+                <h2 class="section-title">Content Warnings</h2>
+                <div class="warning-grid">
+                    <div class="warning-item">
+                        <div class="warning-item-icon">⚡</div>
+                        <div class="warning-item-content">
+                            <strong>Photosensitivity Warning</strong>
+                            <p>Contains flashing lights, strobe effects, and rapid visual changes that may trigger seizures in individuals with photosensitive epilepsy.</p>
+                        </div>
+                    </div>
+                    <div class="warning-item">
+                        <div class="warning-item-icon">🔊</div>
+                        <div class="warning-item-content">
+                            <strong>Audio Intensity</strong>
+                            <p>Features sudden loud sounds, jump scares, ambient horror audio, and high-intensity sound effects.</p>
+                        </div>
+                    </div>
+                    <div class="warning-item">
+                        <div class="warning-item-icon">🌙</div>
+                        <div class="warning-item-content">
+                            <strong>Visual Atmosphere</strong>
+                            <p>Includes dark environments, limited visibility, disturbing imagery, and atmospheric horror elements.</p>
+                        </div>
+                    </div>
+                    <div class="warning-item">
+                        <div class="warning-item-icon">💭</div>
+                        <div class="warning-item-content">
+                            <strong>Psychological Elements</strong>
+                            <p>Designed to induce stress, anxiety, fear, and tension through suspenseful gameplay mechanics.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-section">
+                <h2 class="section-title">Health & Safety</h2>
+                <div class="health-advisory">
+                    <p><strong>Not Recommended For:</strong></p>
+                    <ul class="health-list">
+                        <li>Individuals with photosensitive epilepsy or seizure disorders</li>
+                        <li>People with heart conditions or cardiac issues</li>
+                        <li>Those experiencing anxiety disorders or PTSD</li>
+                        <li>Children under 13 years of age</li>
+                        <li>Pregnant individuals or those with high blood pressure</li>
+                    </ul>
+                    <p class="health-note">
+                        If you experience dizziness, nausea, discomfort, or any adverse symptoms, 
+                        discontinue play immediately and consult a healthcare professional if necessary.
+                    </p>
+                </div>
+            </div>
+
+            <div class="warning-disclaimer">
+                <p>
+                    <strong>By clicking "Accept & Continue" below, you acknowledge that:</strong>
+                </p>
+                <ul class="disclaimer-list">
+                    <li>You have read and understood all warnings and advisories presented</li>
+                    <li>You accept full responsibility for your experience and any reactions</li>
+                    <li>You confirm you are not in any of the "not recommended" categories above</li>
+                    <li>You understand this is a horror experience designed to create fear and discomfort</li>
+                </ul>
+                <p class="disclaimer-footer">
+                    Player discretion is strongly advised. Play at your own risk.
+                </p>
+            </div>
+            
+            <button class="continue-button" id="warningContinueBtn">
+                <span class="button-text">ACCEPT & CONTINUE</span>
+                <span class="button-subtext">I understand the risks</span>
+            </button>
         </div>
     </div>
 
