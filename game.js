@@ -1535,8 +1535,8 @@ function updatePlayer(delta) {
             player.position.z + direction.z * moveSpeed
         );
 
-        // Check for collision before moving
-        if (!checkCollision(newPosition)) { // Collision enabled
+        // Check for collision before moving (DISABLED for free navigation)
+        if (true) { // Collision disabled - walk freely
             // No collision - safe to move!
             player.position.copy(newPosition);
             
