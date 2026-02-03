@@ -1323,8 +1323,8 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (spawn in OPEN SPACE in center of map)
-    player.position.set(0, 0.5, 0);  // Center of map - definitely open space
+    // Reset player (spawn at your chosen position)
+    player.position.set(0.1, 0.5, 1.0);  // Your exact position from screenshot
     if (player.mesh) {
         player.mesh.position.copy(player.position);
         player.mesh.rotation.y = 0;  // Face forward
@@ -1535,8 +1535,8 @@ function updatePlayer(delta) {
             player.position.z + direction.z * moveSpeed
         );
 
-        // Check for collision before moving (DISABLED - noclip mode for positioning)
-        if (true) { // Collision disabled - you can walk through walls
+        // Check for collision before moving
+        if (!checkCollision(newPosition)) { // Collision enabled
             // No collision - safe to move!
             player.position.copy(newPosition);
             
