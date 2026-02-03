@@ -1323,16 +1323,16 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (spawn at office desk - based on FNAF HW map layout)
-    player.position.set(-10, 1.5, 0);  // Office position
+    // Reset player (spawn in OPEN SPACE in center of map)
+    player.position.set(0, 0.5, 0);  // Center of map - definitely open space
     if (player.mesh) {
         player.mesh.position.copy(player.position);
-        player.mesh.rotation.y = Math.PI / 2;  // Face right toward desk
+        player.mesh.rotation.y = 0;  // Face forward
         player.mesh.visible = false; // Hide in first-person
     }
     
     // Reset camera rotation 
-    cameraRotation.yaw = Math.PI / 2;  // Face right
+    cameraRotation.yaw = 0;  // Face forward
     cameraRotation.pitch = 0;
     
     flashlight.battery = 100;
