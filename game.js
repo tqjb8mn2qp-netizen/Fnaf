@@ -1323,16 +1323,16 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (start in main hall area - safe open spawn point)
-    player.position.set(0, 0.5, 8);  // Spawn in open area, slightly elevated to avoid floor clipping
+    // Reset player (start in front of security desk facing monitors)
+    player.position.set(0, 0.5, 3);  // Spawn in front of desk area
     if (player.mesh) {
         player.mesh.position.copy(player.position);
-        player.mesh.rotation.y = 0;  // Face forward
+        player.mesh.rotation.y = Math.PI;  // Face toward desk/monitors
         player.mesh.visible = false; // Hide in first-person
     }
     
-    // Reset camera rotation (facing forward)
-    cameraRotation.yaw = 0;
+    // Reset camera rotation (facing desk/monitors)
+    cameraRotation.yaw = Math.PI;  // Turn around to face desk
     cameraRotation.pitch = 0;
     
     flashlight.battery = 100;
