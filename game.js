@@ -1323,8 +1323,8 @@ function startGame() {
     gameState.dead = false;
     gameState.won = false;
     
-    // Reset player (spawn at your exact position - moved up to avoid floor clip)
-    player.position.set(0.1, 1.0, 1.0);  // Raised Y to 1.0 to avoid being stuck in floor
+    // Reset player (spawn HIGH UP in center - guaranteed open space)
+    player.position.set(0, 3.0, 0);  // Way up high in center of map
     if (player.mesh) {
         player.mesh.position.copy(player.position);
         player.mesh.rotation.y = 0;  // Face forward
@@ -1535,8 +1535,8 @@ function updatePlayer(delta) {
             player.position.z + direction.z * moveSpeed
         );
 
-        // Check for collision before moving
-        if (!checkCollision(newPosition)) { // Collision ENABLED - normal gameplay
+        // Check for collision before moving - DISABLED FOR TESTING
+        if (true) { // NO COLLISION - test if movement works at all
             // No collision - safe to move!
             player.position.copy(newPosition);
             
