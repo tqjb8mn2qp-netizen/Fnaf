@@ -1865,12 +1865,11 @@ function animate() {
 
     const delta = clock.getDelta();
 
-    if (gameState.playing && !gameState.paused) {
-        updatePlayer(delta);
-        updateFlashlight(delta);
-        updateTime(delta);
-        // updateAnimatronics(delta); // DISABLED - No enemies
-    }
+    // ALWAYS update player (forced for debugging)
+    updatePlayer(delta);
+    updateFlashlight(delta);
+    updateTime(delta);
+    // updateAnimatronics(delta); // DISABLED - No enemies
 
     renderer.render(scene, camera);
 }
