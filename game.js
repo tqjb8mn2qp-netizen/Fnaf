@@ -389,6 +389,14 @@ function init() {
 
     // Start animation loop
     animate();
+    
+    // AUTO-START GAME (bypass menu for testing)
+    setTimeout(() => {
+        console.log('Auto-starting game...');
+        document.getElementById('mainMenu').style.display = 'none';
+        document.getElementById('modeSelection').style.display = 'none';
+        startGame();
+    }, 2000); // Start after 2 seconds
 }
 
 // Load new FNAF Help Wanted map
