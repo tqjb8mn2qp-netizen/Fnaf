@@ -1499,7 +1499,11 @@ function showWarning(text) {
 
 // Update Functions
 function updatePlayer(delta) {
-    if (!player.canMove || player.hiding) return;
+    // DEBUG: Log canMove status
+    if (!player.canMove || player.hiding) {
+        console.log('Movement blocked! canMove:', player.canMove, 'hiding:', player.hiding);
+        return;
+    }
 
     const moveSpeed = player.isCrouching ? player.crouchSpeed : 
                      (player.isSprinting ? player.sprintSpeed : player.speed);
@@ -1507,18 +1511,20 @@ function updatePlayer(delta) {
     const direction = new THREE.Vector3();
     
     // Desktop controls
-    if (keys['KeyW']) direction.z -= 1;
-    if (keys['KeyS']) direction.z += 1;
-    if (keys['KeyA']) direction.x -= 1;
-    if (keys['KeyD']) direction.x += 1;
+    if (keys['KeyW']) { direction.z -= 1; console.log('W pressed'); }
+    if (keys['KeyS']) { direction.z += 1; console.log('S pressed'); }
+    if (keys['KeyA']) { direction.x -= 1; console.log('A pressed'); }
+    if (keys['KeyD']) { direction.x += 1; console.log('D pressed'); }
 
     // Mobile controls - movement joystick
     if (isMobile && touchControls.move.active) {
+        console.log('Mobile touch active:', touchControls.move.x, touchControls.move.y);
         direction.x += touchControls.move.x;
         direction.z += touchControls.move.y;
     }
 
     if (direction.length() > 0) {
+        console.log('Direction detected:', direction.x, direction.y, direction.z);
         direction.normalize();
         
         // First-person: Movement is relative to camera yaw (horizontal rotation only)
