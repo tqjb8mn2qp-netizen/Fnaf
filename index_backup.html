@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External Nights - First Person Horror</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            background: #000;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* HUD Elements */
+        #hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        #time {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+        }
+
+        #night {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #ffffff;
+            text-shadow: 0 0 5px #ffffff;
+        }
+
+        #flashlightBattery {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 16px;
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        #flashlightBar {
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffff00;
+            margin-top: 5px;
+        }
+
+        #flashlightFill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffff00, #ff8800);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        #interaction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        #warning {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+
+        /* Menu Screens */
+        #mainMenu, #gameOver, #victory {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+        }
+
+        #gameOver, #victory {
+            display: none;
+        }
+
+        .menu-title {
+            font-size: 48px;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            margin-bottom: 20px;
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .menu-subtitle {
+            font-size: 20px;
+            color: #ffffff;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+
+        .menu-button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin: 10px;
+            pointer-events: all;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .menu-button:hover {
+            background: #cc0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 500px;
+        }
+
+        .instructions h3 {
+            color: #ff8800;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        #jumpScare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        #jumpScareText {
+            font-size: 72px;
+            color: #ff0000;
+            text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
+            animation: scareShake 0.1s infinite;
+        }
+
+        @keyframes scareShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-10px, 10px) rotate(-5deg); }
+            50% { transform: translate(10px, -10px) rotate(5deg); }
+            75% { transform: translate(-10px, -10px) rotate(-5deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile Touch Controls */
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        #mobileControls.active {
+            display: block;
+        }
+
+        .joystick-container {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            pointer-events: all;
+        }
+
+        #moveJoystick {
+            bottom: 30px;
+            left: 30px;
+        }
+
+        #lookJoystick {
+            bottom: 30px;
+            right: 30px;
+        }
+
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            border: 3px solid rgba(255, 0, 0, 0.4);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .joystick-stick {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 0, 0, 0.6);
+            border: 3px solid rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s;
+        }
+
+        .mobile-button {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 3px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .mobile-button:active {
+            background: rgba(255, 0, 0, 0.6);
+        }
+
+        #flashlightButton {
+            bottom: 120px;
+            right: 200px;
+        }
+
+        #interactButton {
+            bottom: 30px;
+            right: 200px;
+        }
+
+        #sprintButton {
+            bottom: 210px;
+            right: 200px;
+        }
+
+        @media (max-width: 768px), (pointer: coarse) {
+            .instructions p {
+                font-size: 12px;
+            }
+            
+            #flashlightButton {
+                right: 30px;
+                bottom: 200px;
+            }
+            
+            #interactButton {
+                right: 110px;
+                bottom: 200px;
+            }
+            
+            #sprintButton {
+                right: 190px;
+                bottom: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="hud">
+        <div id="time">12 AM</div>
+        <div id="night">Night 1</div>
+        <div id="flashlightBattery">
+            Flashlight: <span id="batteryPercent">100</span>%
+            <div id="flashlightBar">
+                <div id="flashlightFill"></div>
+            </div>
+        </div>
+        <div id="interaction"></div>
+        <div id="warning"></div>
+        <div id="crosshair"></div>
+    </div>
+
+    <div id="mainMenu">
+        <h1 class="menu-title">EXTERNAL NIGHTS</h1>
+        <p class="menu-subtitle">Survive the night. They are watching. They are hunting.</p>
+        <button class="menu-button" id="startGameButton">START NIGHT 1</button>
+        
+        <div class="instructions">
+            <h3>HOW TO SURVIVE:</h3>
+            <p id="desktopInstructions">
+                <strong>WASD</strong> - Move around<br>
+                <strong>Mouse</strong> - Rotate camera (Roblox-style!)<br>
+                <strong>Mouse Wheel</strong> - Zoom in/out<br>
+                <strong>F</strong> - Toggle flashlight (drains battery)<br>
+                <strong>E</strong> - Interact (doors, hiding spots)<br>
+                <strong>Shift</strong> - Sprint (makes noise)<br>
+                <strong>Ctrl</strong> - Crouch (quieter movement)<br>
+                <strong>ESC</strong> - Pause
+            </p>
+            <p id="mobileInstructions" style="display:none;">
+                <strong>Left Joystick</strong> - Move around<br>
+                <strong>Right Joystick</strong> - Look around<br>
+                <strong>🔦 Button</strong> - Toggle flashlight<br>
+                <strong>✋ Button</strong> - Interact with objects<br>
+                <strong>⚡ Button</strong> - Sprint (hold while moving)
+            </p>
+            <br>
+            <p style="color: #ff8800;">⚠️ Watch your flashlight battery!</p>
+            <p style="color: #ff8800;">⚠️ They hunt by sound and sight!</p>
+            <p style="color: #ff8800;">⚠️ Survive until 6 AM!</p>
+        </div>
+    </div>
+
+    <div id="gameOver">
+        <h1 class="menu-title">YOU DIED</h1>
+        <p class="menu-subtitle" id="deathMessage">They found you...</p>
+        <button class="menu-button" onclick="restartGame()">TRY AGAIN</button>
+        <button class="menu-button" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+
+    <div id="victory">
+        <h1 class="menu-title" style="color: #00ff00; text-shadow: 0 0 20px #00ff00;">6 AM</h1>
+        <p class="menu-subtitle">You survived the night!</p>
+        <button class="menu-button" style="background: #00aa00;" onclick="nextNight()">NEXT NIGHT</button>
+        <button class="menu-button" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+
+    <div id="jumpScare">
+        <div id="jumpScareText">THEY GOT YOU</div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="mobileControls">
+        <!-- Movement Joystick (Left) -->
+        <div id="moveJoystick" class="joystick-container">
+            <div class="joystick-base">
+                <div class="joystick-stick" id="moveStick"></div>
+            </div>
+        </div>
+
+        <!-- Look Joystick (Right) -->
+        <div id="lookJoystick" class="joystick-container">
+            <div class="joystick-base">
+                <div class="joystick-stick" id="lookStick"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="flashlightButton" class="mobile-button" title="Toggle Flashlight">🔦</div>
+        <div id="interactButton" class="mobile-button" title="Interact">✋</div>
+        <div id="sprintButton" class="mobile-button" title="Sprint">⚡</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

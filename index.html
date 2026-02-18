@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Shadows of Freddy's - First Person Horror</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            background: #000;
+        }
+
+        /* Hide game canvas and HUD until warning is dismissed */
+        #gameCanvas,
+        #hud {
+            display: none;
+        }
+
+        body.game-ready #gameCanvas,
+        body.game-ready #hud {
+            display: block;
+        }
+
+        #gameCanvas {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* HUD Elements */
+        #hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        #time {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+        }
+
+        #night {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #ffffff;
+            text-shadow: 0 0 5px #ffffff;
+        }
+
+        #flashlightBattery {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 16px;
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        #flashlightBar {
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffff00;
+            margin-top: 5px;
+        }
+
+        #flashlightFill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffff00, #ff8800);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        #interaction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        #warning {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+        }
+
+        /* Menu Screens */
+        #mainMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('menu-background.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+            padding-left: 80px;
+        }
+        
+        #mainMenu::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        #gameOver, #victory {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+        }
+
+        .menu-title {
+            font-size: 140px;
+            color: #ffffff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            margin-bottom: 80px;
+            font-weight: 900;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            line-height: 1.0;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .menu-subtitle {
+            display: none;
+        }
+        
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .menu-button {
+            padding: 12px 0;
+            font-size: 45px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            pointer-events: all;
+            transition: all 0.2s;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 7px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+
+        .menu-button:hover {
+            color: #00ff00;
+            transform: translateX(20px);
+            text-shadow: 2px 2px 8px rgba(0, 255, 0, 0.8);
+        }
+
+        /* Mode Selection Screen */
+        #modeSelection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('menu-background.jpg');
+            background-size: cover;
+            background-position: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+        }
+        
+        #modeSelection::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        
+        .mode-options {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .mode-button {
+            width: 400px;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            pointer-events: all;
+        }
+        
+        .mode-button:hover {
+            border-color: #00ff00;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+        
+        .mode-preview {
+            width: 100%;
+            height: 70%;
+            background: rgba(20, 20, 20, 0.8);
+            background-size: cover;
+            background-position: center;
+        }
+        
+        #soloModeButton .mode-preview {
+            background-image: url('solo-mode-preview.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        #multiplayerModeButton .mode-preview {
+            background-image: url('multiplayer-mode-preview.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.6);
+        }
+        
+        .mode-label {
+            padding: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-align: center;
+            color: white;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+        }
+        
+        .coming-soon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border: 3px solid #ff0000;
+            border-radius: 5px;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            animation: pulse 1.5s infinite;
+        }
+        
+        #multiplayerModeButton:hover {
+            border-color: #ff0000;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            cursor: not-allowed;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 500px;
+        }
+
+        .instructions h3 {
+            color: #ff8800;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        #jumpScare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        #jumpScareText {
+            font-size: 72px;
+            color: #ff0000;
+            text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
+            animation: scareShake 0.1s infinite;
+        }
+
+        @keyframes scareShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-10px, 10px) rotate(-5deg); }
+            50% { transform: translate(10px, -10px) rotate(5deg); }
+            75% { transform: translate(-10px, -10px) rotate(-5deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Mobile Touch Controls */
+        #mobileControls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        #mobileControls.active {
+            display: block;
+        }
+
+        .joystick-container {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            pointer-events: all;
+        }
+
+        #moveJoystick {
+            bottom: 30px;
+            left: 30px;
+        }
+
+        #lookJoystick {
+            bottom: 30px;
+            right: 30px;
+        }
+
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            border: 3px solid rgba(255, 0, 0, 0.4);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .joystick-stick {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 0, 0, 0.6);
+            border: 3px solid rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s;
+        }
+
+        .mobile-button {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 3px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .mobile-button:active {
+            background: rgba(255, 0, 0, 0.6);
+        }
+
+        #flashlightButton {
+            bottom: 120px;
+            right: 200px;
+        }
+
+        #interactButton {
+            bottom: 30px;
+            right: 200px;
+        }
+
+        #sprintButton {
+            bottom: 210px;
+            right: 200px;
+        }
+
+        @media (max-width: 768px), (pointer: coarse) {
+            #mainMenu {
+                padding-left: 30px;
+            }
+            
+            .menu-title {
+                font-size: 48px;
+                letter-spacing: 4px;
+            }
+            
+            .menu-button {
+                font-size: 18px;
+                letter-spacing: 2px;
+            }
+            
+            .instructions p {
+                font-size: 12px;
+            }
+            
+            #flashlightButton {
+                right: 30px;
+                bottom: 200px;
+            }
+            
+            #interactButton {
+                right: 110px;
+                bottom: 200px;
+            }
+            
+            #sprintButton {
+                right: 190px;
+                bottom: 200px;
+            }
+        }
+
+        /* Loading Screen (shows first) */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #1a0000 50%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            color: white;
+            overflow: hidden;
+        }
+
+        #loadingScreen::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.05) 0%, transparent 70%);
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        #loadingScreen.hidden {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; pointer-events: none; }
+        }
+
+        .game-logo {
+            font-size: 82px;
+            font-family: 'Courier New', monospace;
+            font-weight: 900;
+            letter-spacing: 12px;
+            color: #ffffff;
+            text-shadow: 
+                0 0 30px #ff0000,
+                0 0 60px #ff0000,
+                0 0 90px #ff0000,
+                0 0 120px rgba(255, 0, 0, 0.5),
+                5px 5px 15px rgba(0, 0, 0, 0.9);
+            margin-bottom: 80px;
+            animation: titleGlow 2.5s ease-in-out infinite alternate;
+            text-align: center;
+            line-height: 1.3;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes titleGlow {
+            from {
+                text-shadow: 
+                    0 0 30px #ff0000,
+                    0 0 60px #ff0000,
+                    0 0 90px #ff0000,
+                    0 0 120px rgba(255, 0, 0, 0.3),
+                    5px 5px 15px rgba(0, 0, 0, 0.9);
+                transform: scale(1);
+            }
+            to {
+                text-shadow: 
+                    0 0 40px #ff0000,
+                    0 0 80px #ff0000,
+                    0 0 120px #ff0000,
+                    0 0 160px rgba(255, 0, 0, 0.6),
+                    5px 5px 15px rgba(0, 0, 0, 0.9);
+                transform: scale(1.02);
+            }
+        }
+
+        .loading-spinner {
+            width: 100px;
+            height: 100px;
+            border: 8px solid rgba(255, 0, 0, 0.1);
+            border-top-color: #ff0000;
+            border-right-color: #ff3333;
+            border-radius: 50%;
+            animation: spinGlow 1s linear infinite;
+            margin-bottom: 50px;
+            box-shadow: 
+                0 0 40px rgba(255, 0, 0, 0.6),
+                inset 0 0 20px rgba(255, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes spinGlow {
+            to { 
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-bar-container {
+            width: 500px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 0, 0, 0.4);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 
+                0 0 20px rgba(255, 0, 0, 0.3),
+                inset 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #ff0000 0%, 
+                #ff4444 25%,
+                #ff0000 50%,
+                #ff4444 75%,
+                #ff0000 100%);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.4s ease-out;
+            box-shadow: 
+                0 0 30px #ff0000,
+                inset 0 0 10px rgba(255, 255, 255, 0.3);
+            animation: shimmerMove 2s linear infinite;
+            position: relative;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent);
+            animation: shimmerSlide 1.5s infinite;
+        }
+
+        @keyframes shimmerMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        @keyframes shimmerSlide {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .loading-text {
+            font-size: 22px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 
+                0 0 10px rgba(255, 0, 0, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: textPulse 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        .loading-percentage {
+            font-size: 42px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 
+                0 0 20px #ff0000,
+                0 0 40px #ff0000,
+                3px 3px 6px rgba(0, 0, 0, 0.8);
+            animation: percentPulse 1s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes percentPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Warning Screen (shows after loading) */
+        #warningScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 40px;
+            overflow: hidden;
+        }
+
+        #warningScreen::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 0, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(255, 0, 0, 0.03) 3px
+                );
+            animation: scanlines 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        #warningScreen.active {
+            display: flex;
+            animation: warningFlash 0.1s ease-in;
+        }
+
+        @keyframes warningFlash {
+            0%, 100% { background-color: #000000; }
+            50% { background-color: #1a0000; }
+        }
+
+        .warning-content {
+            max-width: 700px;
+            max-height: 90vh;
+            text-align: center;
+            animation: warningFadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 1;
+            padding: 50px 60px;
+            background: rgba(0, 0, 0, 0.92);
+            border: 2px solid rgba(255, 68, 0, 0.4);
+            border-radius: 10px;
+            box-shadow: 
+                0 10px 60px rgba(0, 0, 0, 0.8),
+                0 0 80px rgba(255, 68, 0, 0.15);
+            overflow-y: auto;
+        }
+
+        @keyframes warningFadeIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.9) translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+
+        .warning-header {
+            margin-bottom: 30px;
+        }
+
+        .warning-icon {
+            font-size: 56px;
+            margin-bottom: 15px;
+            animation: warningIconPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 68, 0, 0.5));
+        }
+
+        @keyframes warningIconPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+
+        .warning-title {
+            font-size: 40px;
+            font-family: 'Courier New', monospace;
+            font-weight: 900;
+            color: #ff4400;
+            letter-spacing: 6px;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(255, 68, 0, 0.5);
+        }
+
+        @keyframes warningTitlePulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes warningIconBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .warning-description {
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            color: #e0e0e0;
+            line-height: 1.7;
+            margin: 0 0 30px 0;
+        }
+
+        .warning-description strong {
+            color: #ff6600;
+        }
+
+        .warning-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .warning-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 10px;
+            background: rgba(255, 68, 0, 0.05);
+            border: 1px solid rgba(255, 68, 0, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .warning-item:hover {
+            background: rgba(255, 68, 0, 0.12);
+            border-color: #ff4400;
+            transform: translateY(-3px);
+        }
+
+        .warning-item-icon {
+            font-size: 32px;
+            filter: grayscale(0.2);
+        }
+
+        .warning-item strong {
+            font-size: 13px;
+            color: #ffaa66;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        .warning-advisory {
+            background: rgba(255, 187, 0, 0.08);
+            border: 1px solid rgba(255, 187, 0, 0.3);
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .warning-advisory p {
+            font-size: 13px;
+            color: #ffcc66;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .warning-advisory strong {
+            color: #ffdd88;
+        }
+
+        .warning-disclaimer {
+            font-size: 12px;
+            color: #999999;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .continue-button {
+            width: 100%;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ff4400 0%, #cc0000 100%);
+            padding: 18px;
+            border: 2px solid #ff6600;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 30px rgba(255, 68, 0, 0.4),
+                0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .continue-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: buttonShineSlide 3s linear infinite;
+        }
+
+        @keyframes buttonShineSlide {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        .continue-button:hover {
+            background: linear-gradient(135deg, #ff6600 0%, #ff0000 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 0 50px rgba(255, 68, 0, 0.7),
+                0 6px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .continue-button:active {
+            transform: translateY(0);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .game-logo {
+                font-size: 36px;
+                letter-spacing: 4px;
+                margin-bottom: 40px;
+            }
+
+            .loading-bar-container {
+                width: 80%;
+            }
+
+            .warning-content {
+                padding: 30px 25px;
+                max-height: 88vh;
+            }
+
+            .warning-icon {
+                font-size: 42px;
+            }
+
+            .warning-title {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+
+            .warning-description {
+                font-size: 13px;
+            }
+
+            .warning-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .warning-item {
+                padding: 15px 8px;
+            }
+
+            .warning-item-icon {
+                font-size: 24px;
+            }
+
+            .warning-item strong {
+                font-size: 11px;
+            }
+
+            .warning-advisory {
+                padding: 12px 15px;
+            }
+
+            .warning-advisory p {
+                font-size: 11px;
+            }
+
+            .warning-disclaimer {
+                font-size: 11px;
+            }
+
+            .continue-button {
+                font-size: 15px;
+                padding: 15px;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Loading Screen (shows first) -->
+    <div id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="game-logo">SHADOWS OF<br>FREDDY'S</div>
+        <div class="loading-text">Loading Assets</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-percentage" id="loadingProgress">0%</div>
+    </div>
+
+    <!-- Warning Screen (shows after loading) -->
+    <div id="warningScreen">
+        <div class="warning-content">
+            <div class="warning-header">
+                <div class="warning-icon">⚠</div>
+                <h1 class="warning-title">CONTENT WARNING</h1>
+            </div>
+            
+            <p class="warning-description">
+                This game contains <strong>intense horror content</strong> including jump scares, 
+                disturbing imagery, flashing lights, and loud sounds.
+            </p>
+
+            <div class="warning-grid">
+                <div class="warning-item">
+                    <div class="warning-item-icon">⚡</div>
+                    <strong>Photosensitivity</strong>
+                </div>
+                <div class="warning-item">
+                    <div class="warning-item-icon">🔊</div>
+                    <strong>Intense Audio</strong>
+                </div>
+                <div class="warning-item">
+                    <div class="warning-item-icon">🌙</div>
+                    <strong>Dark Themes</strong>
+                </div>
+                <div class="warning-item">
+                    <div class="warning-item-icon">💭</div>
+                    <strong>Psychological</strong>
+                </div>
+            </div>
+
+            <div class="warning-advisory">
+                <p><strong>Not recommended for:</strong> Individuals with epilepsy, heart conditions, anxiety disorders, or children under 13.</p>
+            </div>
+
+            <div class="warning-disclaimer">
+                By continuing, you acknowledge understanding and accept responsibility for your experience.
+            </div>
+            
+            <button class="continue-button" id="warningContinueBtn">
+                ACCEPT & CONTINUE
+            </button>
+        </div>
+    </div>
+
+    <!-- HUD Elements -->
+    <div id="hud">
+        <div id="time">12 AM</div>
+        <div id="night">Night 1</div>
+        <div id="flashlightBattery">
+            Flashlight: <span id="batteryPercent">100</span>%
+            <div id="flashlightBar">
+                <div id="flashlightFill"></div>
+            </div>
+        </div>
+        <div id="interaction"></div>
+        <div id="warning"></div>
+        <div id="crosshair"></div>
+        <div id="positionDebug" style="position: absolute; top: 100px; left: 20px; color: #00ff00; font-size: 14px; text-shadow: 0 0 5px #00ff00; font-family: monospace;">
+            Position: (0, 0, 0)
+        </div>
+    </div>
+
+    <div id="mainMenu" style="display: none;">
+        <h1 class="menu-title">SHADOWS OF<br>FREDDY'S</h1>
+        
+        <div class="menu-options">
+            <button class="menu-button" id="startGameButton">START GAME</button>
+            <button class="menu-button" id="settingsButton">SETTINGS</button>
+            <button class="menu-button" id="creditsButton">CREDITS</button>
+            <button class="menu-button" id="storeButton">STORE</button>
+            <button class="menu-button" id="achievementsButton">ACHIEVEMENTS</button>
+        </div>
+        
+        <div id="loadingStatus" style="display:none; margin-top: 20px; color: #ffff00; font-size: 18px;">
+            <p>Loading FNAF Map... <span id="loadingPercent">0</span>%</p>
+        </div>
+        
+        <div class="instructions" style="display:none;">
+            <h3>HOW TO SURVIVE:</h3>
+            <p id="desktopInstructions">
+                <strong>WASD</strong> - Move around<br>
+                <strong>Mouse</strong> - Rotate camera (Roblox-style!)<br>
+                <strong>Mouse Wheel</strong> - Zoom in/out<br>
+                <strong>F</strong> - Toggle flashlight (drains battery)<br>
+                <strong>E</strong> - Interact (doors, hiding spots)<br>
+                <strong>Shift</strong> - Sprint (makes noise)<br>
+                <strong>Ctrl</strong> - Crouch (quieter movement)<br>
+                <strong>ESC</strong> - Pause
+            </p>
+            <p id="mobileInstructions" style="display:none;">
+                <strong>Left Joystick</strong> - Move around<br>
+                <strong>Right Joystick</strong> - Look around<br>
+                <strong>🔦 Button</strong> - Toggle flashlight<br>
+                <strong>✋ Button</strong> - Interact with objects<br>
+                <strong>⚡ Button</strong> - Sprint (hold while moving)
+            </p>
+            <br>
+            <p style="color: #ff8800;">⚠️ Watch your flashlight battery!</p>
+            <p style="color: #ff8800;">⚠️ They hunt by sound and sight!</p>
+            <p style="color: #ff8800;">⚠️ Survive until 6 AM!</p>
+        </div>
+    </div>
+
+    <!-- Mode Selection Menu -->
+    <div id="modeSelection" style="display:none;">
+        <h1 class="menu-title" style="margin-bottom: 50px;">SELECT MODE</h1>
+        
+        <div class="mode-options">
+            <button class="mode-button" id="soloModeButton">
+                <div class="mode-preview"></div>
+                <div class="mode-label">SOLO MODE</div>
+            </button>
+            
+            <button class="mode-button" id="multiplayerModeButton">
+                <div class="mode-preview"></div>
+                <div class="mode-label">MULTIPLAYER</div>
+                <div class="coming-soon">COMING SOON</div>
+            </button>
+        </div>
+        
+        <button class="menu-button" id="returnButton" style="margin-top: 50px;">RETURN</button>
+    </div>
+
+    <div id="gameOver">
+        <h1 class="menu-title">YOU DIED</h1>
+        <p class="menu-subtitle" id="deathMessage">They found you...</p>
+        <button class="menu-button" onclick="restartGame()">TRY AGAIN</button>
+        <button class="menu-button" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+
+    <div id="victory">
+        <h1 class="menu-title" style="color: #00ff00; text-shadow: 0 0 20px #00ff00;">6 AM</h1>
+        <p class="menu-subtitle">You survived the night!</p>
+        <button class="menu-button" style="background: #00aa00;" onclick="nextNight()">NEXT NIGHT</button>
+        <button class="menu-button" onclick="returnToMenu()">MAIN MENU</button>
+    </div>
+
+    <div id="jumpScare">
+        <div id="jumpScareText">THEY GOT YOU</div>
+    </div>
+
+    <!-- Mobile Touch Controls -->
+    <div id="mobileControls">
+        <!-- Movement Joystick (Left) -->
+        <div id="moveJoystick" class="joystick-container">
+            <div class="joystick-base">
+                <div class="joystick-stick" id="moveStick"></div>
+            </div>
+        </div>
+
+        <!-- Look Joystick (Right) -->
+        <div id="lookJoystick" class="joystick-container">
+            <div class="joystick-base">
+                <div class="joystick-stick" id="lookStick"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div id="flashlightButton" class="mobile-button" title="Toggle Flashlight">🔦</div>
+        <div id="interactButton" class="mobile-button" title="Interact">✋</div>
+        <div id="sprintButton" class="mobile-button" title="Sprint">⚡</div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="menuMusic" loop>
+        <source src="menu-music.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="menuClickSound">
+        <source src="menu-click-sound.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="game.js?v=20260203"></script>
+</body>
+</html>
